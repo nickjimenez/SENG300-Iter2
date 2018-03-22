@@ -1,4 +1,10 @@
-//To be used in tandem with counter class
+/**
+ * @author	Blandon Tang
+ * @Date	Last Edited March 22, 2018
+ * Seng 300 Iteration 2 of group project
+ * Includes feature to recursively search through directory for .java files
+ * TODO: Requires implementation of JAR file searching
+ */
 package counter;
 
 import java.io.BufferedReader;
@@ -7,11 +13,11 @@ import java.io.FileReader;
 import java.io.IOException;
 
  
-// Takes files within the directory path (variable listed as folder)
-// converts all found .java files into charArray 
+// Driver for program that relies on a static call to counter class
+// Counter class creates instances of ASTParser for visiting ASTNodes
 public class Main {
 
-	static String pathname = "D:\\University\\SENG 300\\Testing"; 						//"D:\\eclipse-workspace\\Counter"
+	static String pathname = "D:\\University\\SENG 300\\Testing"; 		// Change pathname to folder path for testing
 	
 	// Driver for program
 	public static void main(String[] args) throws IOException {
@@ -19,38 +25,44 @@ public class Main {
 		fileWalk(pathname);
 	}
 	
-	
+	// A Recursive function that looks inside a folder and creates a parser for every .java file found
 	public static void fileWalk(String pathname) throws IOException {
 				
-		File folder = new File(pathname);			// Replace pathName with actual path i.e D:\\eclipse-workspace\\File Reader
-		File[] listOfFiles = folder.listFiles();
-				
-		// Iterate through all java files in the folder
+		File folder = new File(pathname);			
 		
-		// Nothing in folder exit
-		if (listOfFiles == null)
-				return;
-		
-		for (File javaFiles : listOfFiles) {
-			if (javaFiles.isDirectory()) {
-				fileWalk(javaFiles.getAbsolutePath());
-			}
+		if (folder.isDirectory()) {
+			File[] listOfFiles = folder.listFiles();
 			
-			else {
-				if (javaFiles.isFile() && javaFiles.getName().endsWith(".java")) {		
-					//Counter.parse(ReadFileToCharArray(javaFiles.getName())); 		//do conversion for all .java files
-					String fileFound = javaFiles.getName();
-					//char[] returnedCharArray = ReadFileToCharArray(javaFiles.getName());  	// the return of the method can be stored for use later with ASTParser
-					System.out.println(fileFound);									// For testing purposes
-					// returnedCharArray holds the char[] resulting from ReadFileToCharArray method
+			// Iterate through all java files in the folder
+			for (File javaFiles : listOfFiles) {
+				if (javaFiles.isDirectory()) {
+					fileWalk(javaFiles.getAbsolutePath());		// recursive call for subfolders and their subfolders
+				} 
+			
+				else {
+					if (javaFiles.isFile() && javaFiles.getName().endsWith(".java")) {		
+					
+						//String fileFound = javaFiles.getName();									// For testing purposes
+						//System.out.println("\n" + fileFound);									// For testing purposes
+						System.out.println();					//Line break - Optional for final product
+						Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath())); 		//do conversion for all .java files
+					}
 				}
-			}	
+			}
 		}
 		
-		// else if (//this is a pseudo switch for jar) in the event that the program needs to handle both jar and recursive file walking
-		
-		
+		// ******
+		// else if here for JAR file type - A pseudo switch for looking at the JAR type
+		// ******
+		// This is where the work for JAR file types should go
+		// since a JAR file is essentially a zip file, I assume we need to open it up (with some variable type that accepts zip (jar) files)
+		// Then we could make hash map or array to fileld with all individual files from JAR and then we just call our static parse method
+		// (The parse method comes from the Counter file)
+		// ******
+	
 	}
+		
+	
 	
 	
 	// Responsible for taking a java file and converting it to a string then to a charArray
@@ -73,6 +85,7 @@ public class Main {
 		//System.out.println(retCharArray); 				       //Print test - uncomment out to print what is written in .java files
  
 		return  retCharArray;	
+			
 	}
 	
 	
