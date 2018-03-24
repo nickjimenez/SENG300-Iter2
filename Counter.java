@@ -1,4 +1,4 @@
-package counter;
+//package counter;
 //Main method is used to test
 
 //Current version only prints out the outputs into console  
