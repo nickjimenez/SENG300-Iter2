@@ -17,6 +17,11 @@
  * 				 From there it parses as usual
  * Problem: The issue is that if the program is ran back to back with the same .jar file it will read the same file more than once
  * Possible Fix: After everything is done, we delete that unzipped version of the .jar file
+ * @Date LAst Edited March 24
+ * It now deletes the unzipped folder that gets created, it goes through each file in that directory and deletes each one before deleting the directory itself
+ * TODO: Count the declarations and references and implement command line which shouldn't take too long
+ * TODO: Document and clean up the code itself lol
+ * TODO: If we have time, trim down the length of the code, i feel like i have some redundant lines of code in there that can be removed 
  */
 //package counter;
 
@@ -41,6 +46,10 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 	
 		fileWalk(pathname);
+		File directory = new File(pathname + "\\newUnzip");
+		System.out.println();
+		delete(directory);
+		
 	}
 	
 	// A Recursive function that looks inside a folder and creates a parser for every .java file found
@@ -153,5 +162,44 @@ public class Main {
 	    return destdir;
 
 	  }
+	
+	
+	public static void delete(File file)
+		    	throws IOException{
+		 
+		    	if(file.isDirectory()){
+		 
+		    		//directory is empty, then delete it
+		    		if(file.list().length==0){
+		    			
+		    		   file.delete();
+		    		   System.out.println("Directory is deleted : " + file.getAbsolutePath());		//Was just for testing
+		    			
+		    		}else{
+		    			
+		    		   //list all the directory contents
+		        	   String files[] = file.list();
+		     
+		        	   for (String temp : files) {
+		        	      //construct the file structure
+		        	      File fileDelete = new File(file, temp);
+		        		 
+		        	      //recursive delete
+		        	     delete(fileDelete);
+		        	   }
+		        		
+		        	   //check the directory again, if empty then delete it
+		        	   if(file.list().length==0){
+		           	     file.delete();
+		        	     System.out.println("Directory is deleted : " + file.getAbsolutePath());   //was just for testing
+		        	   }
+		    		}
+		    		
+		    	}else{
+		    		//if file, then delete it
+		    		file.delete();
+		    		System.out.println("File is deleted : " + file.getAbsolutePath());				//Was just for testing
+		    	}
+		    }
 	
 }
