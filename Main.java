@@ -1,9 +1,8 @@
 /**
  * @author	Blandon Tang
- * @Date	Last Edited March 22, 2018
+ * @Date	Last Edited March 24, 2018
  * Seng 300 Iteration 2 of group project
  * Includes feature to recursively search through directory for .java files
- * TODO: Requires implementation of JAR file searching
  */
 
 /**
@@ -20,31 +19,33 @@
  * @Date LAst Edited March 24
  * It now deletes the unzipped folder that gets created, it goes through each file in that directory and deletes each one before deleting the directory itself
  * TODO: Count the declarations and references and implement command line which shouldn't take too long
- * TODO: Document and clean up the code itself lol
  * TODO: If we have time, trim down the length of the code, i feel like i have some redundant lines of code in there that can be removed 
  */
-//package counter;
+
+package counter;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.jar.*;
-import java.util.zip.ZipFile;
-import java.util.Enumeration;
-import java.io.*;
+import java.io.InputStream;
+
 
  
 // Driver for program that relies on a static call to counter class
 // Counter class creates instances of ASTParser for visiting ASTNodes
 public class Main {
 
-	public static String pathname = "C:\\Users\\Daniel Nwaroh\\Desktop\\300test"; 		// Change pathname to folder path for testing
+	public static String pathname = "D:\\University\\SENG 300\\Testing"; 		// Change pathname to folder path for testing
 	public static String destdir;														// New destination of the files we extracted for jar file
+	private static java.util.jar.JarFile jarfile;
 	
 	// Driver for program
 	public static void main(String[] args) throws IOException {
 	
+		// Initialize static variables for counting here??
+		
 		fileWalk(pathname);
 		File directory = new File(pathname + "\\newUnzip");
 		System.out.println();
@@ -83,7 +84,7 @@ public class Main {
 						//extract the jar file
 						String newFolder = extractJAR(pathname + "\\" + fileFound);
 						//System.out.println(newFolder);														//for testing
-						fileWalk(newFolder);																	//might not need
+						fileWalk(newFolder);																	
 						
 						
 					}
@@ -91,20 +92,9 @@ public class Main {
 			}
 		}
 		
-		// ******
-		// else if here for JAR file type - A pseudo switch for looking at the JAR type
-		// ******
-		// This is where the work for JAR file types should go
-		// since a JAR file is essentially a zip file, I assume we need to open it up (with some variable type that accepts zip (jar) files)
-		// Then we could make hash map or array to fileld with all individual files from JAR and then we just call our static parse method
-		// (The parse method comes from the Counter file)
-		// ******
-	
 	}
 		
-	
-	
-	
+		
 	// Responsible for taking a java file and converting it to a string then to a charArray
 	public static char[] ReadFileToCharArray(String filePath) throws IOException {
 		StringBuilder fileData = new StringBuilder(1000);
@@ -130,7 +120,7 @@ public class Main {
 	
 	//extracts the jar file into a directory within the current directory we are searching
 	public static String extractJAR(String toBeExtracted) throws java.io.IOException {
-		java.util.jar.JarFile jarfile = new java.util.jar.JarFile(new java.io.File(toBeExtracted));
+		jarfile = new java.util.jar.JarFile(new java.io.File(toBeExtracted));
 	    java.util.Enumeration<java.util.jar.JarEntry> enu= jarfile.entries();
 	    String destdir = pathname + "\\newUnzip";     //probably not needed
 	    while(enu.hasMoreElements())
@@ -139,18 +129,18 @@ public class Main {
 	    	//System.out.println("Started");
 	        //System.out.println(je.getName());
 
-	        java.io.File fl = new java.io.File(destdir, je.getName());
+	        File fl = new File(destdir, je.getName());
 	        if(!fl.exists())
 	        {
 	            fl.getParentFile().mkdirs();
-	            fl = new java.io.File(destdir, je.getName());
+	            fl = new File(destdir, je.getName());
 	        }
 	        if(je.isDirectory())
 	        {
 	            continue;
 	        }
-	        java.io.InputStream is = jarfile.getInputStream(je);
-	        java.io.FileOutputStream fo = new java.io.FileOutputStream(fl);
+	        InputStream is = jarfile.getInputStream(je);
+	        FileOutputStream fo = new FileOutputStream(fl);
 	        while(is.available()>0)
 	        {
 	            fo.write(is.read());
@@ -164,6 +154,7 @@ public class Main {
 	  }
 	
 	
+	// Function to delete the temporary folder used to read the jar file
 	public static void delete(File file)
 		    	throws IOException{
 		 
