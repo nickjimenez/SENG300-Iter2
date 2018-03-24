@@ -5,8 +5,7 @@ package counter;
  * @Date	Last Edited March 22, 2018
  * Seng 300 Iteration 2 of group project
  * Includes feature to recursively search through directory for .java files
- * TODO: Requires implementation of JAR file searching
- */
+  */
 
 /**
  * @author Daniel Nwaroh
