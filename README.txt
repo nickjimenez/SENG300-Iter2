@@ -1,4 +1,4 @@
-Three branches for Repo
-Master contains last working copies of both branches
-File Recursion contains work for looking recursively at .java files in a folder
-JAR contains work for parsing a .jar file
+Purpose of program:
+
+Recursively serach through a subfolder or a jar file and parse through .java files.
+Program outputs number of declarations and references found
