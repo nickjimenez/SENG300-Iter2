@@ -5,30 +5,57 @@
  * Includes feature to recursively search through directory for .java files
  * TODO: Requires implementation of JAR file searching
  */
-package counter;
+
+/**
+ * @author Daniel Nwaroh
+ * @Date Last Edited March 23
+ * SENG 300 Iteration 2 Group Project
+ * Includes feature to recursively search through directory for .java files
+ * Now searches JAR files and reads the .java files in them
+ * In test jar file: Point.java and Average.java
+ * How it works: To read through the jar file, i just extract all the files to new folder which is inside the directory being searched
+ * 				 From there it parses as usual
+ * Problem: The issue is that if the program is ran back to back with the same .jar file it will read the same file more than once
+ * Possible Fix: After everything is done, we delete that unzipped version of the .jar file
+ * @Date LAst Edited March 24
+ * It now deletes the unzipped folder that gets created, it goes through each file in that directory and deletes each one before deleting the directory itself
+ * TODO: Count the declarations and references and implement command line which shouldn't take too long
+ * TODO: Document and clean up the code itself lol
+ * TODO: If we have time, trim down the length of the code, i feel like i have some redundant lines of code in there that can be removed 
+ */
+//package counter;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.jar.*;
+import java.util.zip.ZipFile;
+import java.util.Enumeration;
+import java.io.*;
 
  
 // Driver for program that relies on a static call to counter class
 // Counter class creates instances of ASTParser for visiting ASTNodes
 public class Main {
 
-	static String pathname = "D:\\University\\SENG 300\\Testing"; 		// Change pathname to folder path for testing
+	public static String pathname = "C:\\Users\\Daniel Nwaroh\\Desktop\\300test"; 		// Change pathname to folder path for testing
+	public static String destdir;														// New destination of the files we extracted for jar file
 	
 	// Driver for program
 	public static void main(String[] args) throws IOException {
 	
 		fileWalk(pathname);
+		File directory = new File(pathname + "\\newUnzip");
+		System.out.println();
+		delete(directory);
+		
 	}
 	
 	// A Recursive function that looks inside a folder and creates a parser for every .java file found
 	public static void fileWalk(String pathname) throws IOException {
 				
-		File folder = new File(pathname);			
+		File folder = new File(pathname);
 		
 		if (folder.isDirectory()) {
 			File[] listOfFiles = folder.listFiles();
@@ -46,6 +73,19 @@ public class Main {
 						//System.out.println("\n" + fileFound);									// For testing purposes
 						System.out.println();					//Line break - Optional for final product
 						Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath())); 		//do conversion for all .java files
+					}
+					else if (javaFiles.isFile() && javaFiles.getName().endsWith(".jar")) {
+						String fileFound = javaFiles.getName();
+						System.out.println();
+						System.out.println("jar file found: " + fileFound);										// To check if jar file has been found
+						
+						//Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath()));
+						//extract the jar file
+						String newFolder = extractJAR(pathname + "\\" + fileFound);
+						//System.out.println(newFolder);														//for testing
+						fileWalk(newFolder);																	//might not need
+						
+						
 					}
 				}
 			}
@@ -88,5 +128,78 @@ public class Main {
 			
 	}
 	
+	//extracts the jar file into a directory within the current directory we are searching
+	public static String extractJAR(String toBeExtracted) throws java.io.IOException {
+		java.util.jar.JarFile jarfile = new java.util.jar.JarFile(new java.io.File(toBeExtracted));
+	    java.util.Enumeration<java.util.jar.JarEntry> enu= jarfile.entries();
+	    String destdir = pathname + "\\newUnzip";     //probably not needed
+	    while(enu.hasMoreElements())
+	    {
+	    	java.util.jar.JarEntry je = enu.nextElement();
+	    	//System.out.println("Started");
+	        //System.out.println(je.getName());
+
+	        java.io.File fl = new java.io.File(destdir, je.getName());
+	        if(!fl.exists())
+	        {
+	            fl.getParentFile().mkdirs();
+	            fl = new java.io.File(destdir, je.getName());
+	        }
+	        if(je.isDirectory())
+	        {
+	            continue;
+	        }
+	        java.io.InputStream is = jarfile.getInputStream(je);
+	        java.io.FileOutputStream fo = new java.io.FileOutputStream(fl);
+	        while(is.available()>0)
+	        {
+	            fo.write(is.read());
+	        }
+	        fo.close();
+	        is.close();
+	    }
+	    System.out.println("Done");								//for testing
+	    return destdir;
+
+	  }
+	
+	
+	public static void delete(File file)
+		    	throws IOException{
+		 
+		    	if(file.isDirectory()){
+		 
+		    		//directory is empty, then delete it
+		    		if(file.list().length==0){
+		    			
+		    		   file.delete();
+		    		   System.out.println("Directory is deleted : " + file.getAbsolutePath());		//Was just for testing
+		    			
+		    		}else{
+		    			
+		    		   //list all the directory contents
+		        	   String files[] = file.list();
+		     
+		        	   for (String temp : files) {
+		        	      //construct the file structure
+		        	      File fileDelete = new File(file, temp);
+		        		 
+		        	      //recursive delete
+		        	     delete(fileDelete);
+		        	   }
+		        		
+		        	   //check the directory again, if empty then delete it
+		        	   if(file.list().length==0){
+		           	     file.delete();
+		        	     System.out.println("Directory is deleted : " + file.getAbsolutePath());   //was just for testing
+		        	   }
+		    		}
+		    		
+		    	}else{
+		    		//if file, then delete it
+		    		file.delete();
+		    		System.out.println("File is deleted : " + file.getAbsolutePath());				//Was just for testing
+		    	}
+		    }
 	
 }
