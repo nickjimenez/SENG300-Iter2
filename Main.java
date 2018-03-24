@@ -1,3 +1,5 @@
+package counter;
+
 /**
  * @author	Blandon Tang
  * @Date	Last Edited March 22, 2018
@@ -5,19 +7,37 @@
  * Includes feature to recursively search through directory for .java files
  * TODO: Requires implementation of JAR file searching
  */
-package counter;
+
+/**
+ * @author Daniel Nwaroh
+ * @Date Last Edited March 23
+ * SENG 300 Iteration 2 Group Project
+ * Includes feature to recursively search through directory for .java files
+ * Now searches JAR files and reads the .java files in them
+ * In test jar file: Point.java and Average.java
+ * How it works: To read through the jar file, i just extract all the files to new folder which is inside the directory being searched
+ * 				 From there it parses as usual
+ * Problem: The issue is that if the program is ran back to back with the same .jar file it will read the same file more than once
+ * Possible Fix: After everything is done, we delete that unzipped version of the .jar file
+ */
+//package counter;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+
 
  
 // Driver for program that relies on a static call to counter class
 // Counter class creates instances of ASTParser for visiting ASTNodes
 public class Main {
 
-	static String pathname = "D:\\University\\SENG 300\\Testing"; 		// Change pathname to folder path for testing
+	public static String pathname = "D:\\University\\SENG 300\\Testing"; 		// Change pathname to folder path for testing
+	public static String destdir;														// New destination of the files we extracted for jar file
+	private static java.util.jar.JarFile jarfile;
 	
 	// Driver for program
 	public static void main(String[] args) throws IOException {
@@ -28,7 +48,7 @@ public class Main {
 	// A Recursive function that looks inside a folder and creates a parser for every .java file found
 	public static void fileWalk(String pathname) throws IOException {
 				
-		File folder = new File(pathname);			
+		File folder = new File(pathname);
 		
 		if (folder.isDirectory()) {
 			File[] listOfFiles = folder.listFiles();
@@ -47,19 +67,23 @@ public class Main {
 						System.out.println();					//Line break - Optional for final product
 						Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath())); 		//do conversion for all .java files
 					}
+					else if (javaFiles.isFile() && javaFiles.getName().endsWith(".jar")) {
+						String fileFound = javaFiles.getName();
+						System.out.println();
+						System.out.println("jar file found: " + fileFound);										// To check if jar file has been found
+						
+						//Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath()));
+						//extract the jar file
+						String newFolder = extractJAR(pathname + "\\" + fileFound);
+						//System.out.println(newFolder);														//for testing
+						fileWalk(newFolder);																	//might not need
+						
+						
+					}
 				}
 			}
 		}
 		
-		// ******
-		// else if here for JAR file type - A pseudo switch for looking at the JAR type
-		// ******
-		// This is where the work for JAR file types should go
-		// since a JAR file is essentially a zip file, I assume we need to open it up (with some variable type that accepts zip (jar) files)
-		// Then we could make hash map or array to fileld with all individual files from JAR and then we just call our static parse method
-		// (The parse method comes from the Counter file)
-		// ******
-	
 	}
 		
 	
@@ -88,5 +112,42 @@ public class Main {
 			
 	}
 	
+	//extracts the jar file into a directory within the current directory we are searching
+	public static String extractJAR(String toBeExtracted) throws java.io.IOException {
+		jarfile = new java.util.jar.JarFile(new java.io.File(toBeExtracted));
+	    java.util.Enumeration<java.util.jar.JarEntry> enu= jarfile.entries();
+	    String destdir = pathname + "\\newUnzip";     //probably not needed
+	    
+	    while(enu.hasMoreElements())
+	    {
+	    	java.util.jar.JarEntry je = enu.nextElement();
+	    	//System.out.println("Started");
+	        //System.out.println(je.getName());
+
+	    	// Folder variable created is called fl
+	        File fl = new File(destdir, je.getName());
+	        if(!fl.exists())
+	        {
+	            fl.getParentFile().mkdirs();
+	            fl = new File(destdir, je.getName());
+	        }
+	        if(je.isDirectory())
+	        {
+	            continue;
+	        }
+	        InputStream is = jarfile.getInputStream(je);
+	        FileOutputStream fo = new FileOutputStream(fl);
+	        while(is.available()>0)
+	        {
+	            fo.write(is.read());
+	        }
+	        fo.close();
+	        is.close();
+	        
+	    }
+	    System.out.println("Done");								//for testing
+	    return destdir;
+
+	  }
 	
 }
