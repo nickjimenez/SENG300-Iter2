@@ -66,7 +66,26 @@ public class Test{
 		String directory = BASEDIR + "TestFiles/TestTxt.txt"; 
 		
 	}
-	
+	// Tests for declarations and references
+	@Test
+	public void testValidDeclaration0() throws IOException {
+		String path = BASEDIR + "TestFiles";
+		String[] args = {path};
+		String type = "String"
+		Main.main(args);	
+		assertEquals(3, Counter.getDec());
+		assertEquals(3, Counter.getRef());
+	}
+	// Tests for declarations and references
+	@Test
+	public void testValidDeclaration1() throws IOException {
+		String path = BASEDIR + "TestFiles";
+		String[] args = {path};
+		String type = "Foo"
+		Main.main(args);	
+		assertEquals(3, Counter.getDec());
+		assertEquals(3, Counter.getRef());
+	}
 }
 
 
