@@ -43,7 +43,7 @@ public class Test{
 		assertEquals(0, Counter.getDec());
 	}
 	
-	// Tests for a qualified name in declaration Visitors. 
+	// Tests for a qualified name in declaration Visitors but no type. 
 	@Test
 	public void testValidDeclaration() throws IOException {
 		String path = BASEDIR;
@@ -70,8 +70,8 @@ public class Test{
 	@Test
 	public void testValidDeclaration0() throws IOException {
 		String path = BASEDIR + "TestFiles";
-		String[] args = {path};
-		String type = "String"
+		String[] args = {path, "String"};
+		//String type = "String"
 		Main.main(args);	
 		assertEquals(3, Counter.getDec());
 		assertEquals(3, Counter.getRef());
@@ -80,11 +80,39 @@ public class Test{
 	@Test
 	public void testValidDeclaration1() throws IOException {
 		String path = BASEDIR + "TestFiles";
-		String[] args = {path};
-		String type = "Foo"
+		String[] args = {path, "Foo"};
+		//String type = "Foo"
 		Main.main(args);	
 		assertEquals(3, Counter.getDec());
 		assertEquals(3, Counter.getRef());
+	}
+	
+	// empty Jar file
+	@Test
+	public void testEmptyJar() throws IOException {
+		String path = BASEDIR + "TestFiles/EmptyFolder.jar";
+		String[] args = {path, "int"};
+		Driver.main(args);
+		assertEquals(0, Counter.getDec());
+	}
+	
+	// No references or declarations jar file
+	@Test
+	public void testAbsentType() throws IOException {
+		String path = {BASEDIR + "TestFiles/InnerFolder01.jar"};
+		String[] args = {path, "int"};
+		Driver.main(args);
+		assertEquals(0, Counter.getDec());
+	}
+	
+	// has declarations and references
+	@Test
+	public void testPresentType() throws IOException {
+		String path = {BASEDIR + "TestFiles/InnerFolder01.jar"};
+		String[] args = {path, "String"};
+		Driver.main(args);
+		assertNotNull(Counter.getDec());
+		assertNotNull(Counter.getRef());
 	}
 }
 
