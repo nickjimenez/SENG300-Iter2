@@ -7,6 +7,8 @@
 
 //import javax.annotation.processing.SupportedAnnotationTypes;
 
+import java.util.ArrayList;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -23,6 +25,14 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 public class Counter{
+	
+	public static int declarationsFound = 0;
+	public static int referencesFound = 0;
+	public static int x = 0;
+	public static int y = 0;
+	public static boolean found = false;
+	public static ArrayList<String> refs = new ArrayList<String>();
+	
 	public static void parse(char[] str) {
 		@SuppressWarnings("deprecation")
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
@@ -67,15 +77,79 @@ public class Counter{
 			
 			// Currently prints out the type and respective variable names
 			public boolean visit(VariableDeclarationFragment node) {
+				found = false;
 				IVariableBinding binding = node.resolveBinding();
 				String types = binding.getType().getName();
+				//System.out.println(types.equals("int"));
+				if (types.equals("int") == true) {										//Change "int" to whatever value the user input
+					System.out.println(node);
+					String anode = node.toString();
+					String arr[] = anode.split("=", 2);
+					String first = arr[0];
+					//System.out.println(first);
+					//System.out.println("vdf");
+					declarationsFound++;
+					x = 1;
+					//found = true;
+					if ((node.getRoot().toString().contains(first))) {
+						referencesFound++;
+					}
+					//System.out.println(found);
+				}
+//				String anode = node.toString();
+//				String arr[] = anode.split("=", 2);
+//				String first = arr[0];
+//				if ((x == 1) && (node.getRoot().toString().contains(first))) {
+//					System.out.println("line 99" + first);
+//					referencesFound++;
+//				}
+				
 				String name = binding.getName();
 					
-				
+				//System.out.println(declarationsFound);
 				System.out.printf("Variables: %s Name: %s\n",types, name);
+				//System.out.println(name.getClass().getSimpleName());
+				//System.out.println("int" + ". Declarations found: " + declarationsFound + "; references found: ");
 				return false;
-			}			
+			}
+			
+//			public boolean visit(SimpleName node) {
+//				String name = node.getFullyQualifiedName();
+//				//System.out.println(node);
+//				System.out.println(name + "||" + node.getRoot().toString());
+//				
+//				if ((x == 1) && (node.getRoot().toString().contains(name))) {
+//					System.out.println("found");
+//					//x = 0;
+//					if (found == false) {
+//						x = 0;
+//					}
+//					if (found == true) {
+//						referencesFound++;
+//						//System.out.println(referencesFound);
+//						//System.out.println("okay");
+//					}
+//				}
+//				
+//				//System.out.println(refs);
+////				if (x == 1) {
+////					refs.add(name);
+////					x = 0;
+////				}
+////				for (int i = 0; i < refs.size(); i++) {
+////					if (name.equals(refs.get(i))) {
+////						referencesFound++;
+////					}
+////				}
+//				//System.out.println("Name:" + name + " Ref found: " + referencesFound);
+//				return true;
+//			}
+			
 		});
+	}
+	
+	public void printOutput() {
+		System.out.println("int" + ". Declarations found: " + declarationsFound + "; references found: " + referencesFound);
 	}
 
 

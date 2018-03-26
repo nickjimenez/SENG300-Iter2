@@ -39,17 +39,22 @@ import java.io.*;
 // Counter class creates instances of ASTParser for visiting ASTNodes
 public class Main {
 
-	public static String pathname = "C:\\Users\\Daniel Nwaroh\\Desktop\\300test"; 		// Change pathname to folder path for testing
-	public static String destdir;														// New destination of the files we extracted for jar file
+	public static String pathname = "C:\\Users\\Daniel Nwaroh\\Desktop\\300test"; 					// Change pathname to folder path for testing
+	public static String destdir = pathname + "\\newUnzip";														// New destination of the files we extracted for jar file
+	static Parser p = new Parser();
+	private int declarations = 0;
+	private int references = 0;
 	
 	// Driver for program
 	public static void main(String[] args) throws IOException {
 	
 		fileWalk(pathname);
-		File directory = new File(pathname + "\\newUnzip");
-		System.out.println();
+		File directory = new File(destdir);
+		System.out.println();															//Probably wont need this at the end
 		delete(directory);
-		
+		Counter c = new Counter();
+		c.printOutput();
+		//p.printall();
 	}
 	
 	// A Recursive function that looks inside a folder and creates a parser for every .java file found
@@ -73,6 +78,9 @@ public class Main {
 						//System.out.println("\n" + fileFound);									// For testing purposes
 						System.out.println();					//Line break - Optional for final product
 						Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath())); 		//do conversion for all .java files
+						//p.parseIt(ReadFileToCharArray(javaFiles.getAbsolutePath()), "String", false);
+						
+	
 					}
 					else if (javaFiles.isFile() && javaFiles.getName().endsWith(".jar")) {
 						String fileFound = javaFiles.getName();
@@ -83,28 +91,13 @@ public class Main {
 						//extract the jar file
 						String newFolder = extractJAR(pathname + "\\" + fileFound);
 						//System.out.println(newFolder);														//for testing
-						fileWalk(newFolder);																	//might not need
-						
-						
+						fileWalk(newFolder);																	
 					}
 				}
 			}
 		}
-		
-		// ******
-		// else if here for JAR file type - A pseudo switch for looking at the JAR type
-		// ******
-		// This is where the work for JAR file types should go
-		// since a JAR file is essentially a zip file, I assume we need to open it up (with some variable type that accepts zip (jar) files)
-		// Then we could make hash map or array to fileld with all individual files from JAR and then we just call our static parse method
-		// (The parse method comes from the Counter file)
-		// ******
-	
 	}
-		
-	
-	
-	
+
 	// Responsible for taking a java file and converting it to a string then to a charArray
 	public static char[] ReadFileToCharArray(String filePath) throws IOException {
 		StringBuilder fileData = new StringBuilder(1000);
@@ -124,33 +117,36 @@ public class Main {
 		char[] retCharArray = fileData.toString().toCharArray();
 		//System.out.println(retCharArray); 				       //Print test - uncomment out to print what is written in .java files
  
-		return  retCharArray;	
+		return retCharArray;	
 			
 	}
 	
 	//extracts the jar file into a directory within the current directory we are searching
 	public static String extractJAR(String toBeExtracted) throws java.io.IOException {
-		java.util.jar.JarFile jarfile = new java.util.jar.JarFile(new java.io.File(toBeExtracted));
-	    java.util.Enumeration<java.util.jar.JarEntry> enu= jarfile.entries();
-	    String destdir = pathname + "\\newUnzip";     //probably not needed
+		JarFile jarfile = new JarFile(new File(toBeExtracted));
+		Enumeration<JarEntry> enu = jarfile.entries();						
 	    while(enu.hasMoreElements())
 	    {
 	    	java.util.jar.JarEntry je = enu.nextElement();
 	    	//System.out.println("Started");
 	        //System.out.println(je.getName());
 
-	        java.io.File fl = new java.io.File(destdir, je.getName());
+	        File fl = new File(destdir, je.getName());
+	    	//java.io.File fl = new java.io.File(destdir, je.getName());
 	        if(!fl.exists())
 	        {
 	            fl.getParentFile().mkdirs();
-	            fl = new java.io.File(destdir, je.getName());
+	            fl = new File(destdir, je.getName());
+	            //fl = new java.io.File(destdir, je.getName());
 	        }
 	        if(je.isDirectory())
 	        {
 	            continue;
 	        }
-	        java.io.InputStream is = jarfile.getInputStream(je);
-	        java.io.FileOutputStream fo = new java.io.FileOutputStream(fl);
+	        InputStream is = jarfile.getInputStream(je);
+	        //java.io.InputStream is = jarfile.getInputStream(je);
+	        FileOutputStream fo = new FileOutputStream(fl);
+	        //java.io.FileOutputStream fo = new java.io.FileOutputStream(fl);
 	        while(is.available()>0)
 	        {
 	            fo.write(is.read());
@@ -164,42 +160,34 @@ public class Main {
 	  }
 	
 	
-	public static void delete(File file)
-		    	throws IOException{
-		 
-		    	if(file.isDirectory()){
-		 
-		    		//directory is empty, then delete it
-		    		if(file.list().length==0){
-		    			
-		    		   file.delete();
-		    		   System.out.println("Directory is deleted : " + file.getAbsolutePath());		//Was just for testing
-		    			
-		    		}else{
-		    			
-		    		   //list all the directory contents
-		        	   String files[] = file.list();
-		     
-		        	   for (String temp : files) {
-		        	      //construct the file structure
-		        	      File fileDelete = new File(file, temp);
-		        		 
-		        	      //recursive delete
-		        	     delete(fileDelete);
-		        	   }
-		        		
-		        	   //check the directory again, if empty then delete it
-		        	   if(file.list().length==0){
-		           	     file.delete();
-		        	     System.out.println("Directory is deleted : " + file.getAbsolutePath());   //was just for testing
-		        	   }
-		    		}
-		    		
-		    	}else{
-		    		//if file, then delete it
-		    		file.delete();
-		    		System.out.println("File is deleted : " + file.getAbsolutePath());				//Was just for testing
-		    	}
+	public static void delete(File file) throws IOException{
+		if(file.isDirectory()){
+			//directory is empty, then delete it
+			if(file.list().length==0) {
+				file.delete();
+				//System.out.println("Directory is deleted : " + file.getAbsolutePath());		//Was just for testing
+			} 
+			else {
+				//list all the directory contents
+				String files[] = file.list();
+				for (String temp : files) {
+					//construct the file structure
+					File fileDelete = new File(file, temp);
+					//recursive delete
+					delete(fileDelete);
+				}
+				//check the directory again, if empty then delete it
+				if(file.list().length==0){
+					file.delete();
+					//System.out.println("Directory is deleted : " + file.getAbsolutePath());   //was just for testing
+				}
 		    }
+		}
+		else {
+			//if file, then delete it
+			file.delete();
+			//System.out.println("File is deleted : " + file.getAbsolutePath());				//Was just for testing
+		}
+	}
 	
 }
