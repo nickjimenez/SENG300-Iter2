@@ -1,27 +1,6 @@
 /**
- * @author	Blandon Tang
- * @Date	Last Edited March 22, 2018
- * Seng 300 Iteration 2 of group project
- * Includes feature to recursively search through directory for .java files
- * TODO: Requires implementation of JAR file searching
- */
-
-/**
- * @author Daniel Nwaroh
- * @Date Last Edited March 23
- * SENG 300 Iteration 2 Group Project
- * Includes feature to recursively search through directory for .java files
- * Now searches JAR files and reads the .java files in them
- * In test jar file: Point.java and Average.java
- * How it works: To read through the jar file, i just extract all the files to new folder which is inside the directory being searched
- * 				 From there it parses as usual
- * Problem: The issue is that if the program is ran back to back with the same .jar file it will read the same file more than once
- * Possible Fix: After everything is done, we delete that unzipped version of the .jar file
- * @Date LAst Edited March 24
- * It now deletes the unzipped folder that gets created, it goes through each file in that directory and deletes each one before deleting the directory itself
- * TODO: Count the declarations and references and implement command line which shouldn't take too long
- * TODO: Document and clean up the code itself lol
- * TODO: If we have time, trim down the length of the code, i feel like i have some redundant lines of code in there that can be removed 
+ *  @author Daniel Nwaroh, Blandon Tang, Kevin Lee, Kevin Huynh, Nickole Jiminez, Denis Shevchenko
+ *  Iteration 2
  */
 //package counter;
 
@@ -30,16 +9,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.jar.*;
-import java.util.zip.ZipFile;
 import java.util.Enumeration;
 import java.io.*;
 
- 
 // Driver for program that relies on a static call to counter class
 // Counter class creates instances of ASTParser for visiting ASTNodes
 public class Main {
 
-	//public static String pathname = "C:\\Users\\Daniel Nwaroh\\Desktop\\300test"; 					// Change pathname to folder path for testing
 	public static String pathname;
 	public static String destdir = pathname + "\\newUnzip";														// New destination of the files we extracted for jar file
 	public static String javaTypeName;
@@ -50,9 +26,7 @@ public class Main {
 		fileWalk(pathname);
 		File directory = new File(destdir);
 		delete(directory);
-		///////////////////////////////////////////////////////
-		System.out.println("Declarations: " + Counter.getDec());
-		System.out.println("References: " + Counter.getRef());
+		Counter.printOutput();
 	}
 	
 	// A Recursive function that looks inside a folder and creates a parser for every .java file found
@@ -68,7 +42,6 @@ public class Main {
 				if (javaFiles.isDirectory()) {
 					fileWalk(javaFiles.getAbsolutePath());		// recursive call for subfolders and their subfolders
 				} 
-			
 				else {
 					if (javaFiles.isFile() && javaFiles.getName().endsWith(".java")) {		
 						Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath())); 		//do conversion for all .java files
@@ -161,5 +134,4 @@ public class Main {
     		System.out.println("Not enough arguments, please provide the pathname and the Java type.");
     	}
 	}
-	
 }
