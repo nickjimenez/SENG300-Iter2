@@ -1,151 +1,178 @@
-/**
- * @author	Blandon Tang
- * @Date	Last Edited March 25, 2018
- * Seng 300 Iteration 2 of group project
- * The counter portion of the project. Utilizes a hash map to count declarations and references
- * 
- */
 
-//package counter;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.MarkerAnnotation;
-import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-
-
-// This class is responsible for counting the declarations and references as well as the visitation
-// AST nodes in order to find number of declarations and references
-// Declarations and References stored in hash maps where the key (string type) is the variable type and
-// value is the number found
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+ 
 public class Counter{
-
-	static HashMap<String, Integer> declarations = new HashMap<String, Integer>();
-	static HashMap<String, Integer> references = new HashMap<String, Integer>();
-	
-	public static void parse(char[] charArray){
-		
-		@SuppressWarnings("deprecation")
+	// Used to count declarations
+	// Key: String of the type
+	// Value: Integer count of the number of declaration of the type
+	static HashMap declare = new 	HashMap<String, Integer>();
+	static HashMap reference = new 	HashMap<String, Integer>();
+	public static void parse(char[] str) {
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		
-		// Initialization of Parser
-		parser.setSource(charArray);
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setCompilerOptions(null);
-		parser.setBindingsRecovery(true);
 		parser.setResolveBindings(true);
-		parser.setUnitName("");
-				
+		parser.setSource(str);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setBindingsRecovery(true);
+		
+		// setEnvironment and setUnitName is required to run resolveBindings
 		parser.setEnvironment(null, null, null, true);
-			
+		parser.setUnitName("");
+		 
+ 
 		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
- 		
 		
 		cu.accept(new ASTVisitor() {
-			
-			// Count number of normal Annotation types
-			public boolean visit (NormalAnnotation node) {
-				String normAnnot = node.resolveTypeBinding().getQualifiedName();
-				
-				if (references.containsKey(normAnnot)) 
-					references.put(normAnnot, references.get(normAnnot)+1);	
-				
-				else 
-					references.put(normAnnot, 1);
-				
+			// Adds package to the declaration counter
+			public boolean visit(PackageDeclaration node) {
+				String packageName = node.getName().toString();
+				if(declare.containsKey(packageName)){
+					int value = (int) declare.get(packageName);
+					value++;
+					declare.put(packageName, value);
+				}else{
+					int value = 1;
+					declare.put(packageName, value);
+				}	
 				return true;
 			}
 			
-			// Count number of marker annotation types 
-			public boolean visit (MarkerAnnotation node) {
-				String markerAnnot = node.resolveTypeBinding().getQualifiedName();
-				
-				if (references.containsKey(markerAnnot)) 
-					references.put(markerAnnot, references.get(markerAnnot)+1);	
-					
-				else 
-					references.put(markerAnnot, 1);
-				
+			// Adds imports to the declaration counter
+			public boolean visit(ImportDeclaration node) {
+				String importName = node.getName().toString();
+				if(declare.containsKey(importName)){
+					int value = (int) declare.get(importName);
+					value++;
+					declare.put(importName, value);
+				}else{
+					int value = 1;
+					declare.put(importName, value);
+				}	
 				return true;
 			}
 			
-			// Count number of annotation declarations
-			public boolean visit(AnnotationTypeDeclaration node) {			
-				String annotDec = node.resolveBinding().getQualifiedName();
+			// Adds methods and its parameters declaration
+			public boolean visit(MethodDeclaration node){
+				String methName = node.getName().toString();
+				IMethodBinding binding = node.resolveBinding();
+				String test = binding.getReturnType().toString();
+				System.out.println(test);
+				if(reference.containsKey(test)){
+					System.out.println(test);
+				}
 				
-				if (declarations.containsKey(annotDec)) 
-					declarations.put(annotDec, declarations.get(annotDec)+1);	
-								
-				else 
-					declarations.put(annotDec, 1);
-				
-				return true;
-			}
-			
-			// Count number of type declarations
-			public boolean visit(TypeDeclaration node) {
-				String typeDec = node.resolveBinding().getQualifiedName();
-				
-				if (declarations.containsKey(typeDec)) 
-					declarations.put(typeDec, declarations.get(typeDec)+1);	
-					
-				else 
-					declarations.put(typeDec, 1);
-				
-				return true;
-			}
-			
-			// Count number of enumeration declarations
-			public boolean visit(EnumDeclaration node) {												
-				String enumDec = node.resolveBinding().getQualifiedName();
-				
-				if (declarations.containsKey(enumDec)) 
-					declarations.put(enumDec, declarations.get(enumDec)+1);	
-								
-				else 
-					declarations.put(enumDec, 1);
-				
-				return true;
-			}
-		
-			// count number of simple type references
-			public boolean visit(SimpleType node) { 
-				String simType = node.resolveBinding().getQualifiedName();
-				
-				if (references.containsKey(simType)) 
-					references.put(simType, references.get(simType)+1);	
-				
-				else 
-					references.put(simType, 1);
-				
-				return true;
-			}
-			
-			// Count number of primitive types
-			public boolean visit(PrimitiveType node) {	
-				String primType = node.resolveBinding().getQualifiedName();
-				
-				if (references.containsKey(primType)) 
-					references.put(primType, references.get(primType)+1);	
-					
-				else 
-					references.put(primType, 1);
-				
-				return true;
-			}
-			
+				// add the method name to the declaration counter
+				if(declare.containsKey(methName)){
+					int value = (int) declare.get(methName);
+					value++;
+					declare.put(methName, value);
+				}else{
+					int value = 1;
+					declare.put(methName, value);
+					reference.put(methName, 0);
+				}	
 
+				// checks every parameter
+				for(Object param : node.parameters()){
+					// varDecalare = Variable type + variable name
+					VariableDeclaration varDeclare = (VariableDeclaration) param;
+					// varType = only Variable type
+					String varType = varDeclare.getStructuralProperty(SingleVariableDeclaration.TYPE_PROPERTY).toString();
+					// add parameters to the declaration counter
+					if(declare.containsKey(varType)){
+						int value = (int) declare.get(varType);
+						value++;
+						declare.put(varType, value);
+					}else{
+						int value = 1;
+						declare.put(varType, value);
+					}	
+				}
+				return true;
+			}
+
+			// Checks for Classes/interface declarations
+			public boolean visit(TypeDeclaration node) {
+				ITypeBinding binding = node.resolveBinding();
+				String key = binding.getName().toString();
+				// adds to the declaration counter
+				if(declare.containsKey(key)){
+					int value = (int) declare.get(key);
+					value++;
+					declare.put(key, value);
+				}else{
+					int value = 1;
+					declare.put(key, value);
+				}	
+				
+				return true;
+			}
+
+			// Checks every variable declared and increases the declare hash map counter by one according to their respective types
+			// Doesn't add primitives to declare hash map
+			// Also covers fields
+			public boolean visit(VariableDeclarationFragment node) {
+				// used to check variables for primitive types
+				// primitives are never declared, only referenced from java.lang.(insert primitive type)
+				//String primitives [] = { "boolean", "byte", "char", "short", "int", "long", "float", "double" };
+				String primitives = "boolean byte char short int long float double";
+				IVariableBinding binding = node.resolveBinding();
+				String key = binding.getType().getName();
+				
+				// as long as the variable isn't a primitive type, increase the counter of the declare hash map by 1
+				if(!(primitives.contains(key))){
+					// adds to the declaration counter
+					if(declare.containsKey(key)){
+						int value = (int) declare.get(key);
+						value++;
+						declare.put(key, value);
+					}else{
+						int value = 1;
+						declare.put(key, value);
+					}					
+				}
+				return false;
+			}			
 		});
-		
 	}
  
-
+	// for debugging purposes
+	// prints every key their respective count in the declare hashmap
+	public static void printDeclare(){
+		Set keys = declare.keySet();
+		Iterator iter = keys.iterator();
+		while(iter.hasNext()){
+			String key = (String) iter.next();
+			int value = (int) declare.get(key);
+			System.out.println(key + ". Declarations found: " + value); // used for debugging
+		}
+		
+	}
+	public static void printReference(){
+		Set keys = reference.keySet();
+		Iterator iter = keys.iterator();
+		while(iter.hasNext()){
+			String key = (String) iter.next();
+			int value = (int) reference.get(key);
+			System.out.println(key + ". reference found: " + value); // used for debugging
+		}
+		
+	}
 }
