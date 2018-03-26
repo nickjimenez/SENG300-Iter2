@@ -39,22 +39,19 @@ import java.io.*;
 // Counter class creates instances of ASTParser for visiting ASTNodes
 public class Main {
 
-	public static String pathname = "C:\\Users\\Daniel Nwaroh\\Desktop\\300test"; 					// Change pathname to folder path for testing
+	//public static String pathname = "C:\\Users\\Daniel Nwaroh\\Desktop\\300test"; 					// Change pathname to folder path for testing
+	public static String pathname;
 	public static String destdir = pathname + "\\newUnzip";														// New destination of the files we extracted for jar file
-	static Parser p = new Parser();
-	private int declarations = 0;
-	private int references = 0;
+	public static String javaTypeName;
 	
 	// Driver for program
 	public static void main(String[] args) throws IOException {
-	
+		setArgs(args);
 		fileWalk(pathname);
 		File directory = new File(destdir);
-		System.out.println();															//Probably wont need this at the end
 		delete(directory);
-		Counter c = new Counter();
-		c.printOutput();
-		//p.printall();
+		System.out.println("Declarations: " + Counter.declarations);
+		System.out.println("References: " + Counter.references);
 	}
 	
 	// A Recursive function that looks inside a folder and creates a parser for every .java file found
@@ -73,24 +70,11 @@ public class Main {
 			
 				else {
 					if (javaFiles.isFile() && javaFiles.getName().endsWith(".java")) {		
-					
-						//String fileFound = javaFiles.getName();									// For testing purposes
-						//System.out.println("\n" + fileFound);									// For testing purposes
-						System.out.println();					//Line break - Optional for final product
 						Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath())); 		//do conversion for all .java files
-						//p.parseIt(ReadFileToCharArray(javaFiles.getAbsolutePath()), "String", false);
-						
-	
 					}
 					else if (javaFiles.isFile() && javaFiles.getName().endsWith(".jar")) {
-						String fileFound = javaFiles.getName();
-						System.out.println();
-						System.out.println("jar file found: " + fileFound);										// To check if jar file has been found
-						
-						//Counter.parse(ReadFileToCharArray(javaFiles.getAbsolutePath()));
-						//extract the jar file
+						String fileFound = javaFiles.getName();	
 						String newFolder = extractJAR(pathname + "\\" + fileFound);
-						//System.out.println(newFolder);														//for testing
 						fileWalk(newFolder);																	
 					}
 				}
@@ -106,19 +90,13 @@ public class Main {
 		char[] buf = new char[10];
 		int numRead = 0;
 		while ((numRead = reader.read(buf)) != -1) {
-			//System.out.println(numRead);
 			String readData = String.valueOf(buf, 0, numRead);
 			fileData.append(readData);
 			buf = new char[1024];
 		}
- 
 		reader.close();
-		
 		char[] retCharArray = fileData.toString().toCharArray();
-		//System.out.println(retCharArray); 				       //Print test - uncomment out to print what is written in .java files
- 
-		return retCharArray;	
-			
+		return retCharArray;				
 	}
 	
 	//extracts the jar file into a directory within the current directory we are searching
@@ -128,44 +106,30 @@ public class Main {
 	    while(enu.hasMoreElements())
 	    {
 	    	java.util.jar.JarEntry je = enu.nextElement();
-	    	//System.out.println("Started");
-	        //System.out.println(je.getName());
 
 	        File fl = new File(destdir, je.getName());
-	    	//java.io.File fl = new java.io.File(destdir, je.getName());
-	        if(!fl.exists())
-	        {
+	        if(!fl.exists()) {
 	            fl.getParentFile().mkdirs();
 	            fl = new File(destdir, je.getName());
-	            //fl = new java.io.File(destdir, je.getName());
 	        }
-	        if(je.isDirectory())
-	        {
+	        if(je.isDirectory()) {
 	            continue;
 	        }
 	        InputStream is = jarfile.getInputStream(je);
-	        //java.io.InputStream is = jarfile.getInputStream(je);
 	        FileOutputStream fo = new FileOutputStream(fl);
-	        //java.io.FileOutputStream fo = new java.io.FileOutputStream(fl);
-	        while(is.available()>0)
-	        {
+	        while(is.available()>0) {
 	            fo.write(is.read());
 	        }
 	        fo.close();
 	        is.close();
 	    }
-	    System.out.println("Done");								//for testing
 	    return destdir;
-
 	  }
-	
 	
 	public static void delete(File file) throws IOException{
 		if(file.isDirectory()){
-			//directory is empty, then delete it
 			if(file.list().length==0) {
 				file.delete();
-				//System.out.println("Directory is deleted : " + file.getAbsolutePath());		//Was just for testing
 			} 
 			else {
 				//list all the directory contents
@@ -179,15 +143,22 @@ public class Main {
 				//check the directory again, if empty then delete it
 				if(file.list().length==0){
 					file.delete();
-					//System.out.println("Directory is deleted : " + file.getAbsolutePath());   //was just for testing
 				}
 		    }
 		}
 		else {
 			//if file, then delete it
 			file.delete();
-			//System.out.println("File is deleted : " + file.getAbsolutePath());				//Was just for testing
 		}
+	}
+	
+	public static void setArgs(String[] args) {
+		try {
+    		pathname = args[0];
+    		javaTypeName = args[1];
+    	} catch (ArrayIndexOutOfBoundsException e) {
+    		System.out.println("Not enough arguments, please provide the pathname and the Java type.");
+    	}
 	}
 	
 }

@@ -1,156 +1,151 @@
+/**
+ * @author	Blandon Tang
+ * @Date	Last Edited March 25, 2018
+ * Seng 300 Iteration 2 of group project
+ * The counter portion of the project. Utilizes a hash map to count declarations and references
+ * 
+ */
+
 //package counter;
-//Main method is used to test
 
-//Current version only prints out the outputs into console  
-
-//import java.io.IOException;
-
-//import javax.annotation.processing.SupportedAnnotationTypes;
-
-import java.util.ArrayList;
-
+import java.util.HashMap;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-//import org.eclipse.jdt.core.dom.IAnnotationBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
-//import org.eclipse.jdt.core.dom.MarkerAnnotation;
-//import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 
+
+// This class is responsible for counting the declarations and references as well as the visitation
+// AST nodes in order to find number of declarations and references
+// Declarations and References stored in hash maps where the key (string type) is the variable type and
+// value is the number found
 public class Counter{
+
+	static HashMap<String, Integer> declarations = new HashMap<String, Integer>();
+	static HashMap<String, Integer> references = new HashMap<String, Integer>();
 	
-	public static int declarationsFound = 0;
-	public static int referencesFound = 0;
-	public static int x = 0;
-	public static int y = 0;
-	public static boolean found = false;
-	public static ArrayList<String> refs = new ArrayList<String>();
-	
-	public static void parse(char[] str) {
+	public static void parse(char[] charArray){
+		
 		@SuppressWarnings("deprecation")
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setResolveBindings(true);
-		parser.setSource(str);
+		
+		// Initialization of Parser
+		parser.setSource(charArray);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setCompilerOptions(null);
 		parser.setBindingsRecovery(true);
-		
-		// setEnvironment and setUnitName is required to run resolveBindings
-		parser.setEnvironment(null, null, null, true);
+		parser.setResolveBindings(true);
 		parser.setUnitName("");
-		 
-
+				
+		parser.setEnvironment(null, null, null, true);
+			
 		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+ 		
 		
-		cu.accept(new ASTVisitor() { 
-			// Doesn't work as intended
-			// Checks for annotation type declarations 
-			public boolean visit(AnnotationTypeDeclaration node) {
-				ITypeBinding  binding = node.getName().resolveTypeBinding();
-				String annotType = binding.getQualifiedName();
-				System.out.println("Annotations: " + annotType);
-				return true;
-			}
-			// Checks for Classes/interface declarations
-			public boolean visit(TypeDeclaration node) {
-				SimpleName name = node.getName();
-				System.out.println("Classes/interface: " + name);
-				return true;
-			}
+		cu.accept(new ASTVisitor() {
 			
-			// With added import delcaration
-			public boolean visit(ImportDeclaration node) {
+			// Count number of normal Annotation types
+			public boolean visit (NormalAnnotation node) {
+				String normAnnot = node.resolveTypeBinding().getQualifiedName();
 				
-				String importName = node.getName().toString();
-				System.out.println("Import: " + importName);
+				if (references.containsKey(normAnnot)) 
+					references.put(normAnnot, references.get(normAnnot)+1);	
+				
+				else 
+					references.put(normAnnot, 1);
 				
 				return true;
 			}
 			
-		
-			
-			// Currently prints out the type and respective variable names
-			public boolean visit(VariableDeclarationFragment node) {
-				found = false;
-				IVariableBinding binding = node.resolveBinding();
-				String types = binding.getType().getName();
-				//System.out.println(types.equals("int"));
-				if (types.equals("int") == true) {										//Change "int" to whatever value the user input
-					System.out.println(node);
-					String anode = node.toString();
-					String arr[] = anode.split("=", 2);
-					String first = arr[0];
-					//System.out.println(first);
-					//System.out.println("vdf");
-					declarationsFound++;
-					x = 1;
-					//found = true;
-					if ((node.getRoot().toString().contains(first))) {
-						referencesFound++;
-					}
-					//System.out.println(found);
-				}
-//				String anode = node.toString();
-//				String arr[] = anode.split("=", 2);
-//				String first = arr[0];
-//				if ((x == 1) && (node.getRoot().toString().contains(first))) {
-//					System.out.println("line 99" + first);
-//					referencesFound++;
-//				}
+			// Count number of marker annotation types 
+			public boolean visit (MarkerAnnotation node) {
+				String markerAnnot = node.resolveTypeBinding().getQualifiedName();
 				
-				String name = binding.getName();
+				if (references.containsKey(markerAnnot)) 
+					references.put(markerAnnot, references.get(markerAnnot)+1);	
 					
-				//System.out.println(declarationsFound);
-				System.out.printf("Variables: %s Name: %s\n",types, name);
-				//System.out.println(name.getClass().getSimpleName());
-				//System.out.println("int" + ". Declarations found: " + declarationsFound + "; references found: ");
-				return false;
+				else 
+					references.put(markerAnnot, 1);
+				
+				return true;
 			}
 			
-//			public boolean visit(SimpleName node) {
-//				String name = node.getFullyQualifiedName();
-//				//System.out.println(node);
-//				System.out.println(name + "||" + node.getRoot().toString());
-//				
-//				if ((x == 1) && (node.getRoot().toString().contains(name))) {
-//					System.out.println("found");
-//					//x = 0;
-//					if (found == false) {
-//						x = 0;
-//					}
-//					if (found == true) {
-//						referencesFound++;
-//						//System.out.println(referencesFound);
-//						//System.out.println("okay");
-//					}
-//				}
-//				
-//				//System.out.println(refs);
-////				if (x == 1) {
-////					refs.add(name);
-////					x = 0;
-////				}
-////				for (int i = 0; i < refs.size(); i++) {
-////					if (name.equals(refs.get(i))) {
-////						referencesFound++;
-////					}
-////				}
-//				//System.out.println("Name:" + name + " Ref found: " + referencesFound);
-//				return true;
-//			}
+			// Count number of annotation declarations
+			public boolean visit(AnnotationTypeDeclaration node) {			
+				String annotDec = node.resolveBinding().getQualifiedName();
+				
+				if (declarations.containsKey(annotDec)) 
+					declarations.put(annotDec, declarations.get(annotDec)+1);	
+								
+				else 
+					declarations.put(annotDec, 1);
+				
+				return true;
+			}
 			
-		});
-	}
-	
-	public void printOutput() {
-		System.out.println("int" + ". Declarations found: " + declarationsFound + "; references found: " + referencesFound);
-	}
+			// Count number of type declarations
+			public boolean visit(TypeDeclaration node) {
+				String typeDec = node.resolveBinding().getQualifiedName();
+				
+				if (declarations.containsKey(typeDec)) 
+					declarations.put(typeDec, declarations.get(typeDec)+1);	
+					
+				else 
+					declarations.put(typeDec, 1);
+				
+				return true;
+			}
+			
+			// Count number of enumeration declarations
+			public boolean visit(EnumDeclaration node) {												
+				String enumDec = node.resolveBinding().getQualifiedName();
+				
+				if (declarations.containsKey(enumDec)) 
+					declarations.put(enumDec, declarations.get(enumDec)+1);	
+								
+				else 
+					declarations.put(enumDec, 1);
+				
+				return true;
+			}
+		
+			// count number of simple type references
+			public boolean visit(SimpleType node) { 
+				String simType = node.resolveBinding().getQualifiedName();
+				
+				if (references.containsKey(simType)) 
+					references.put(simType, references.get(simType)+1);	
+				
+				else 
+					references.put(simType, 1);
+				
+				return true;
+			}
+			
+			// Count number of primitive types
+			public boolean visit(PrimitiveType node) {	
+				String primType = node.resolveBinding().getQualifiedName();
+				
+				if (references.containsKey(primType)) 
+					references.put(primType, references.get(primType)+1);	
+					
+				else 
+					references.put(primType, 1);
+				
+				return true;
+			}
+			
 
+		});
+		
+	}
+ 
 
 }
