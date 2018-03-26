@@ -50,8 +50,9 @@ public class Main {
 		fileWalk(pathname);
 		File directory = new File(destdir);
 		delete(directory);
-		System.out.println("Declarations: " + Counter.declarations);
-		System.out.println("References: " + Counter.references);
+		///////////////////////////////////////////////////////
+		System.out.println("Declarations: " + Counter.getDec());
+		System.out.println("References: " + Counter.getRef());
 	}
 	
 	// A Recursive function that looks inside a folder and creates a parser for every .java file found
