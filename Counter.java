@@ -146,6 +146,9 @@ public class Counter{
 		});
 		
 	}
+	
+	//public int getDec{return declarationsNum;}
+	//public int getRef{return referencesNum;}
  
 
 }
