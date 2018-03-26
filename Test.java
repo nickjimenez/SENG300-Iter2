@@ -92,7 +92,7 @@ public class Test{
 	public void testEmptyJar() throws IOException {
 		String path = BASEDIR + "TestFiles/EmptyFolder.jar";
 		String[] args = {path, "int"};
-		Driver.main(args);
+		Main.main(args);
 		assertEquals(0, Counter.declarationsFound());
 	}
 	
@@ -101,7 +101,7 @@ public class Test{
 	public void testAbsentType() throws IOException {
 		String path = {BASEDIR + "TestFiles/InnerFolder01.jar"};
 		String[] args = {path, "int"};
-		Driver.main(args);
+		Main.main(args);
 		assertEquals(0, Counter.declarationsFound());
 	}
 	
@@ -110,7 +110,7 @@ public class Test{
 	public void testPresentType() throws IOException {
 		String path = {BASEDIR + "TestFiles/InnerFolder01.jar"};
 		String[] args = {path, "String"};
-		Driver.main(args);
+		Main.main(args);
 		assertNotNull(Counter.declarationsFound());
 		assertNotNull(Counter.referencesFound());
 	}
