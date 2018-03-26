@@ -145,10 +145,27 @@ public class Counter{
 
 		});
 		
+		HashSum(declarations,references);
 	}
 	
-	//public int getDec{return declarationsNum;}
-	//public int getRef{return referencesNum;}
+	public int getDec(){return declarationsNum;}
+	public int getRef(){return referencesNum;}
  
+	public void HashSum(HashMap<String, Integer> declarations, HashMap<String, Integer> references) {
+		Set<String> decSet = new HashSet<String>();
+		Set<String> refSet = new HashSet<String>();
+        	decSet.addAll(declarations.decSet());
+		refSet.addAll(references.refSet());
+	
+		//for (int count = 0; count < declarations.size(); count++) {
+		for(String dec : decSet) {
+			int value = declarations.get(dec);
+			declarationsNum += value;
+		}
+		for(String ref : refSet) {
+			int value = references.get(dec);
+			referencesNum += value;
+		}
+	}
 
 }
