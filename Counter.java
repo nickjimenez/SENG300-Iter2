@@ -30,6 +30,8 @@ public class Counter{
 
 	static HashMap<String, Integer> declarations = new HashMap<String, Integer>();
 	static HashMap<String, Integer> references = new HashMap<String, Integer>();
+	private int declarationsNum = 0;
+	private int referencesNum = 0;
 	
 	public static void parse(char[] charArray){
 		
@@ -145,17 +147,25 @@ public class Counter{
 
 		});
 		
-		HashSum(declarations,references);
 	}
 	
 	public int getDec(){return declarationsNum;}
 	public int getRef(){return referencesNum;}
  
 	public void HashSum(HashMap<String, Integer> declarations, HashMap<String, Integer> references) {
+		
+		for (int r : references.values()) {
+	          referencesNum += r;
+	        }
+		for (int d : declarations.values()) {
+	          declarationsNum += d;
+	        }
+		
+		/**
 		Set<String> decSet = new HashSet<String>();
 		Set<String> refSet = new HashSet<String>();
-        	decSet.addAll(declarations.decSet());
-		refSet.addAll(references.refSet());
+        decSet.addAll(declarations.decSet());
+        refSet.addAll(references.refSet());
 	
 		//for (int count = 0; count < declarations.size(); count++) {
 		for(String dec : decSet) {
@@ -165,7 +175,7 @@ public class Counter{
 		for(String ref : refSet) {
 			int value = references.get(dec);
 			referencesNum += value;
-		}
+		}*/
 	}
-
+	
 }
