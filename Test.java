@@ -40,7 +40,7 @@ public class Test{
 		//Counter count = new Counter();
 		String[] args = {BASEDIR};
 		Main.main(args);
-		assertEquals(0, Counter.getDec());
+		assertEquals(0, Counter.declarationsFound());
 	}
 	
 	// Tests for a qualified name in declaration Visitors but no type. 
@@ -49,7 +49,7 @@ public class Test{
 		String path = BASEDIR;
 		String[] args = {path};
 		Main.main(args);	
-		assertEquals(0, Counter.getDec());
+		assertEquals(0, Counter.declarationsFound());
 	}
 	
 	// Tests the declaration Visitors for an incorrect, unqualified name
@@ -57,7 +57,7 @@ public class Test{
 	public void testInvalidDeclaration() throws IOException {
 		String[] args = {BASEDIR};
 		Main.main(args);
-		assertEquals(0, Counter.getDec());
+		assertEquals(0, Counter.declarationsFound());
 	}
 	
 	// Tests that the file converter ignores none .java files
@@ -73,8 +73,8 @@ public class Test{
 		String[] args = {path, "String"};
 		//String type = "String"
 		Main.main(args);	
-		assertEquals(3, Counter.getDec());
-		assertEquals(3, Counter.getRef());
+		assertEquals(3, Counter.declarationsFound());
+		assertEquals(3, Counter.referencesFound());
 	}
 	// Tests for declarations and references
 	@Test
@@ -83,8 +83,8 @@ public class Test{
 		String[] args = {path, "Foo"};
 		//String type = "Foo"
 		Main.main(args);	
-		assertEquals(3, Counter.getDec());
-		assertEquals(3, Counter.getRef());
+		assertEquals(3, Counter.declarationsFound());
+		assertEquals(3, Counter.referencesFound());
 	}
 	
 	// empty Jar file
@@ -93,7 +93,7 @@ public class Test{
 		String path = BASEDIR + "TestFiles/EmptyFolder.jar";
 		String[] args = {path, "int"};
 		Driver.main(args);
-		assertEquals(0, Counter.getDec());
+		assertEquals(0, Counter.declarationsFound());
 	}
 	
 	// No references or declarations jar file
@@ -102,7 +102,7 @@ public class Test{
 		String path = {BASEDIR + "TestFiles/InnerFolder01.jar"};
 		String[] args = {path, "int"};
 		Driver.main(args);
-		assertEquals(0, Counter.getDec());
+		assertEquals(0, Counter.declarationsFound());
 	}
 	
 	// has declarations and references
@@ -111,8 +111,8 @@ public class Test{
 		String path = {BASEDIR + "TestFiles/InnerFolder01.jar"};
 		String[] args = {path, "String"};
 		Driver.main(args);
-		assertNotNull(Counter.getDec());
-		assertNotNull(Counter.getRef());
+		assertNotNull(Counter.declarationsFound());
+		assertNotNull(Counter.referencesFound());
 	}
 }
 
